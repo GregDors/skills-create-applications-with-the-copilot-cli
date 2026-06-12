@@ -31,46 +31,85 @@ function divide(a, b) {
   return a / b;
 }
 
-module.exports = { add, subtract, multiply, divide };
+function modulo(a, b) {
+  if (b === 0) throw new Error('Modulo by zero');
+  return a % b;
+}
+
+function power(base, exponent) {
+  return Math.pow(base, exponent);
+}
+
+function squareRoot(n) {
+  if (n < 0) throw new Error('Square root of negative number');
+  return Math.sqrt(n);
+}
+
+module.exports = { add, subtract, multiply, divide, modulo, power, squareRoot };
 
 // CLI behavior
 if (require.main === module) {
   const [, , op, aRaw, bRaw] = process.argv;
 
-  if (!op || aRaw === undefined || bRaw === undefined) {
-    console.error('Usage: node src/calculator.js <operation> <num1> <num2>');
-    console.error('Operations: add (+), subtract (-), multiply (*), divide (/)');
+  if (!op) {
+    console.error('Usage: node src/calculator.js <operation> <num1> [<num2>]');
+    console.error('Operations: add (+), subtract (-), multiply (*), divide (/), modulo (%), power (pow, **), sqrt (unary)');
     process.exit(2);
   }
 
   let result;
   try {
-    const a = toNumber(aRaw);
-    const b = toNumber(bRaw);
     const operator = op.toString().toLowerCase();
 
-    switch (operator) {
-      case 'add':
-      case '+':
-        result = add(a, b);
-        break;
-      case 'subtract':
-      case '-':
-        result = subtract(a, b);
-        break;
-      case 'multiply':
-      case '*':
-      case 'x':
-      case 'times':
-        result = multiply(a, b);
-        break;
-      case 'divide':
-      case '/':
-      case '÷':
-        result = divide(a, b);
-        break;
-      default:
-        throw new Error(`Unknown operation: ${op}`);
+    // Unary operation: sqrt
+    if (operator === 'sqrt' || operator === '√') {
+      if (aRaw === undefined) {
+        throw new Error('sqrt requires a single numeric argument');
+      }
+      const a = toNumber(aRaw);
+      result = squareRoot(a);
+    } else {
+      // Binary operations require two arguments
+      if (aRaw === undefined || bRaw === undefined) {
+        throw new Error('Binary operations require two numeric arguments');
+      }
+      const a = toNumber(aRaw);
+      const b = toNumber(bRaw);
+
+      switch (operator) {
+        case 'add':
+        case '+':
+          result = add(a, b);
+          break;
+        case 'subtract':
+        case '-':
+          result = subtract(a, b);
+          break;
+        case 'multiply':
+        case '*':
+        case 'x':
+        case 'times':
+          result = multiply(a, b);
+          break;
+        case 'divide':
+        case '/':
+        case '÷':
+          result = divide(a, b);
+          break;
+        case 'modulo':
+        case 'mod':
+        case '%':
+          result = modulo(a, b);
+          break;
+        case 'power':
+        case 'pow':
+        case '**':
+        case '^':
+          result = power(a, b);
+          break;
+        default:
+          throw new Error(`Unknown operation: ${op}`);
+      }
     }
 
     // Print result (no extra text so it's script-friendly)
